@@ -1,0 +1,42 @@
+---
+title: "LME"
+author: "J Lacasa"
+date: "4/19/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lme4)
+```
+
+## Load data  
+```{r}
+df <- readxl::read_xlsx("../data/soybeanK.xlsx")
+head(df)
+```
+
+
+## By location  
+```{r}
+## one model for each location
+df %>% 
+  group_by(Location) %>% 
+  nest() %>% 
+  mutate(lme = data %>% map(~lmer(K_pct ~ Krate_kgha + (1|Rep), data = .)))
+
+## location as fixed effect
+m1 <- lmer(K_pct ~ Krate_kgha + Location + (1|Rep), data  =df)
+summary(m1)
+```
+
+## Accross locations 
+```{r}
+m2 <- lmer(K_pct ~ Krate_kgha + (1|Location/Rep), data  =df)
+summary(m2)
+```
+
